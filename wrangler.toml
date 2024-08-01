@@ -1,6 +1,6 @@
 name = "worker-name"
 main = "worker.js"
-account_id = "CF_AKUN_ID"
+account_id = "aa8adb51e58bc29bea503f3d4a173cd2"
 workers_dev = true
 compatibility_date = "2024-07-24"
 
