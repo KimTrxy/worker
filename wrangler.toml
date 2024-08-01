@@ -1,0 +1,9 @@
+name = "worker-name"
+main = "worker.js"
+account_id = "CF_AKUN_ID"
+workers_dev = true
+compatibility_date = "2024-07-24"
+
+[[routes]]
+pattern = "subdomain"
+custom_domain = true
