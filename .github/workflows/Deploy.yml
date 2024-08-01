@@ -1,0 +1,69 @@
+name: Cloudflare Worker
+
+on:
+  workflow_dispatch:
+    inputs:
+      workerName:
+        description: 'Worker Name'
+        required: true
+        type: string
+      proxyIP:
+        description: 'Input Active ProxyIP'
+        required: true
+        type: string
+      subDomain:
+        description: 'Sub domain only'
+        required: true
+        type: string
+      domain:
+        description: 'Domain name at cf'
+        required: true
+        type: string
+      workerUUID:
+        description: 'UUID or auto generate (optional)'
+        required: false
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install wrangler
+        run: |
+          npm install -g wrangler
+
+      - name: Generate UUID 
+        id: generate-uuid
+        run: |
+          if [ -z "${{ github.event.inputs.workerUUID }}" ]; then
+            uuid=$(uuidgen)
+            echo "workerUUID=$uuid" >> $GITHUB_ENV
+          else
+            echo "workerUUID=${{ github.event.inputs.workerUUID }}" >> $GITHUB_ENV
+          fi
+
+      - name: Update Worker dan Proxy
+        run: |
+          sed -i 's/PROXY_PLACE/${{ github.event.inputs.proxyIP }}/' worker.js
+          sed -i 's/UUID_PLACE/${{ env.workerUUID }}/' worker.js
+
+      - name: Update wrangler
+        run: |
+          sed -i 's/^name = .*/name = "${{ github.event.inputs.workerName }}"/' wrangler.toml
+          sed -i 's/pattern = "subdomain"/pattern = "${{ github.event.inputs.subDomain }}.${{ github.event.inputs.domain }}"/' wrangler.toml
+          echo '[[routes]]' >> wrangler.toml
+          echo 'pattern = "ava.game.naver.com.${{ github.event.inputs.subDomain }}.${{ github.event.inputs.domain }}"' >> wrangler.toml
+          echo 'custom_domain = true' >> wrangler.toml
+
+      - name: Publish worker to Cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: wrangler deploy
