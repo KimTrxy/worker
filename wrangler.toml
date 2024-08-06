@@ -1,6 +1,6 @@
 name = "worker-name"
 main = "worker.js"
-account_id = "aa8adb51e58bc29bea503f3d4a173cd2"
+account_id = "fee355d7fee5d607a644fa412305b401"
 workers_dev = true
 compatibility_date = "2024-07-24"
 
